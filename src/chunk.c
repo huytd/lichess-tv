@@ -1,0 +1,148 @@
+/* Chunk Parser
+ *
+ * This is a set of parser functions that help dealing with the
+ * chunk data streamed from Lichess API.
+ *
+ * Everytime we get a chunk, we will need to call the chunk_parse
+ * method to start the parse. The parsed result will be stored in
+ * the current_root struct.
+ *
+ * Every subsequence calls will use the current_root as the data
+ * source.
+ *
+ * When everything is done, we will need to call chunk_destroy to
+ * free up the parsed data.
+ */
+
+#include "chunk.h"
+
+static struct json_value_s* current_root;
+
+struct json_object_element_s*
+find_element_by_name(char* name)
+{
+    struct json_object_s* obj = (struct json_object_s*)current_root->payload;
+    struct json_object_element_s* cur =
+      (struct json_object_element_s*)obj->start;
+    while (strcmp(cur->name->string, name) != 0) {
+        if (cur->next != NULL) {
+            cur = cur->next;
+        } else {
+            return NULL;
+        }
+    }
+    return cur;
+}
+
+struct json_object_element_s*
+find_element_by_name_from(struct json_object_element_s* element, char* name)
+{
+    struct json_object_s* obj = (struct json_object_s*)element;
+    struct json_object_element_s* cur =
+      (struct json_object_element_s*)obj->start;
+    while (cur != NULL && strcmp(cur->name->string, name) != 0) {
+        if (cur->next != NULL) {
+            cur = cur->next;
+        } else {
+            return NULL;
+        }
+    }
+    return cur;
+}
+
+void
+chunk_parse(char* chunk, size_t len)
+{
+    current_root = json_parse(chunk, len);
+}
+
+int
+chunk_is_move_description()
+{
+    if (current_root != NULL) {
+        struct json_object_element_s* tag = find_element_by_name("t");
+        if (tag != NULL) {
+            struct json_string_s* value =
+              (struct json_string_s*)tag->value->payload;
+            return strcmp(value->string, "fen") == 0;
+        }
+    }
+    return 0;
+}
+
+const char*
+chunk_get_fen()
+{
+    if (current_root != NULL) {
+        struct json_object_element_s* data = find_element_by_name("d");
+        if (data != NULL) {
+            struct json_object_element_s* data_el =
+              (struct json_object_element_s*)data->value->payload;
+            struct json_object_element_s* fen =
+              find_element_by_name_from(data_el, "fen");
+            if (fen != NULL) {
+                struct json_string_s* fen_value =
+                  (struct json_string_s*)fen->value->payload;
+                return fen_value->string;
+            }
+        }
+    }
+    return NULL;
+}
+
+void
+parse_player(player_t* player, struct json_object_element_s* obj)
+{
+    player->rating =
+      json_value_as_number(find_element_by_name_from(obj, "rating")->value)
+        ->number;
+    struct json_object_element_s* user =
+      (struct json_object_element_s*)find_element_by_name_from(obj, "user")
+        ->value->payload;
+    player->name =
+      json_value_as_string(find_element_by_name_from(user, "name")->value)
+        ->string;
+}
+
+player_t**
+chunk_get_players()
+{
+    player_t** ret = (player_t**)malloc(2 * sizeof(player_t*));
+    ret[0]         = (player_t*)malloc(sizeof(player_t));
+    ret[1]         = (player_t*)malloc(sizeof(player_t));
+    if (current_root != NULL) {
+        struct json_object_element_s* data = find_element_by_name("d");
+        if (data != NULL) {
+            struct json_object_element_s* data_el =
+              (struct json_object_element_s*)data->value->payload;
+            struct json_object_element_s* players =
+              find_element_by_name_from(data_el, "players");
+            if (players != NULL) {
+                struct json_array_s* players_arr =
+                  json_value_as_array(players->value);
+
+                struct json_array_element_s* player_w = players_arr->start;
+                struct json_object_element_s* player_w_obj =
+                  (struct json_object_element_s*)player_w->value->payload;
+                ret[0]->is_black = 0;
+                parse_player(ret[0], player_w_obj);
+
+                struct json_array_element_s* player_b = player_w->next;
+                struct json_object_element_s* player_b_obj =
+                  (struct json_object_element_s*)player_b->value->payload;
+                ret[1]->is_black = 1;
+                parse_player(ret[1], player_b_obj);
+            }
+        }
+    }
+    return ret;
+}
+
+void
+chunk_destroy()
+{
+    if (current_root != NULL) {
+        free(current_root);
+        current_root = NULL;
+    }
+}
