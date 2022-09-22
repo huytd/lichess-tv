@@ -18,6 +18,7 @@ To build LiTV, you will need to install a couple of things:
 Then build with the following commands:
 
 ```
+$ ./setup
 $ ./build only
 ```
 
