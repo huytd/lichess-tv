@@ -104,12 +104,9 @@ parse_player(player_t* player, struct json_object_element_s* obj)
         ->string;
 }
 
-player_t**
-chunk_get_players()
+void
+chunk_parse_players(player_t* ref_players)
 {
-    player_t** ret = (player_t**)malloc(2 * sizeof(player_t*));
-    ret[0]         = (player_t*)malloc(sizeof(player_t));
-    ret[1]         = (player_t*)malloc(sizeof(player_t));
     if (current_root != NULL) {
         struct json_object_element_s* data = find_element_by_name("d");
         if (data != NULL) {
@@ -124,18 +121,17 @@ chunk_get_players()
                 struct json_array_element_s* player_w = players_arr->start;
                 struct json_object_element_s* player_w_obj =
                   (struct json_object_element_s*)player_w->value->payload;
-                ret[0]->is_black = 0;
-                parse_player(ret[0], player_w_obj);
+                ref_players[0].is_black = 0;
+                parse_player(&ref_players[0], player_w_obj);
 
                 struct json_array_element_s* player_b = player_w->next;
                 struct json_object_element_s* player_b_obj =
                   (struct json_object_element_s*)player_b->value->payload;
-                ret[1]->is_black = 1;
-                parse_player(ret[1], player_b_obj);
+                ref_players[1].is_black = 1;
+                parse_player(&ref_players[1], player_b_obj);
             }
         }
     }
-    return ret;
 }
 
 void

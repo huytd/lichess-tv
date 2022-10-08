@@ -14,6 +14,6 @@ void
 gfx_draw_board(char* board);
 
 void
-gfx_draw_player_info(player_t** players);
+gfx_draw_player_info(player_t* players);
 
 #endif

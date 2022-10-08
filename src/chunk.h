@@ -23,7 +23,7 @@ chunk_destroy();
 const char*
 chunk_get_fen();
 
-player_t**
-chunk_get_players();
+void
+chunk_parse_players(player_t* ref_players);
 
 #endif

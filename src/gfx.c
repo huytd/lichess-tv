@@ -112,23 +112,21 @@ gfx_draw_board(char* board)
 }
 
 void
-gfx_draw_player_info(player_t** players)
+gfx_draw_player_info(player_t* players)
 {
-    player_t* player_b = players[1];
     attrset(COLOR_PAIR(7));
     mvprintw(BOARD_OFFSET_Y - 2, BOARD_OFFSET_X, "●");
     attrset(COLOR_PAIR(6));
-    mvprintw(BOARD_OFFSET_Y - 2, BOARD_OFFSET_X + 2, "%s", player_b->name);
+    mvprintw(BOARD_OFFSET_Y - 2, BOARD_OFFSET_X + 2, "%s", players[1].name);
     attrset(COLOR_PAIR(5));
-    printw(" %s", player_b->rating);
+    printw(" %s", players[1].rating);
 
-    player_t* player_w = players[0];
     attrset(COLOR_PAIR(8));
     mvprintw(10 + BOARD_OFFSET_Y, BOARD_OFFSET_X, "●");
     attrset(COLOR_PAIR(6));
-    mvprintw(10 + BOARD_OFFSET_Y, BOARD_OFFSET_X + 2, "%s", player_w->name);
+    mvprintw(10 + BOARD_OFFSET_Y, BOARD_OFFSET_X + 2, "%s", players[0].name);
     attrset(COLOR_PAIR(5));
-    printw(" %s", player_w->rating);
+    printw(" %s", players[0].rating);
 }
 
 void

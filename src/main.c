@@ -11,7 +11,8 @@ on_data(char* chunk, size_t len)
     chunk_parse(chunk, len);
     if (!chunk_is_move_description()) {
         clear();
-        player_t** players = chunk_get_players();
+        player_t players[2];
+        chunk_parse_players(players);
         gfx_draw_player_info(players);
     }
     char* fen   = (char*)chunk_get_fen();
