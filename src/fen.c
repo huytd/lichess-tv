@@ -3,12 +3,9 @@
 #include <stdlib.h>
 #include "lib/debug.h"
 
-#define BOARD_SIZE 64
-
 char*
-fen_to_board(char* fen)
+fen_to_board(char* fen, char* board)
 {
-    char* board = (char*)malloc(sizeof(char) * (BOARD_SIZE + 1));
     memset(board, '.', sizeof(char) * BOARD_SIZE);
     char* placement = strtok(fen, " ");
     size_t p_pos    = 0;

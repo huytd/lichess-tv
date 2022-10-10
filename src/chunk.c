@@ -93,15 +93,23 @@ chunk_get_fen()
 void
 parse_player(player_t* player, struct json_object_element_s* obj)
 {
-    player->rating =
-      json_value_as_number(find_element_by_name_from(obj, "rating")->value)
-        ->number;
     struct json_object_element_s* user =
       (struct json_object_element_s*)find_element_by_name_from(obj, "user")
         ->value->payload;
-    player->name =
+
+    const char* rating_src =
+      json_value_as_number(find_element_by_name_from(obj, "rating")->value)
+        ->number;
+    const char* name_src =
       json_value_as_string(find_element_by_name_from(user, "name")->value)
         ->string;
+
+    // These JSON strings will be free when chunk_destroy is called
+    // so, we need to copy these name strings into somewhere safe
+    player->rating = (char*)malloc((strlen(rating_src) + 1) * sizeof(char));
+    player->name   = (char*)malloc((strlen(name_src) + 1) * sizeof(char));
+    strcpy(player->rating, rating_src);
+    strcpy(player->name, name_src);
 }
 
 void

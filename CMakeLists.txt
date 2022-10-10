@@ -15,4 +15,4 @@ add_link_options(-fsanitize=address,undefined)
 include_directories(${CMAKE_SOURCE_DIR})
 add_executable(litv ${MAIN_SOURCES})
 
-target_link_libraries(litv ncurses curl)
+target_link_libraries(litv ncurses curl pthread)

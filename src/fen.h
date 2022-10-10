@@ -3,7 +3,9 @@
 
 #include <string.h>
 
+#define BOARD_SIZE 64
+
 char*
-fen_to_board(char* fen);
+fen_to_board(char* fen, char* board);
 
 #endif

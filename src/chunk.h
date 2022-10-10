@@ -7,8 +7,8 @@
 typedef struct
 {
     int is_black;
-    const char* name;
-    const char* rating;
+    char* name;
+    char* rating;
 } player_t;
 
 void
