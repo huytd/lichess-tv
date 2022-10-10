@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include "lib/debug.h"
 
-char*
-fen_to_board(char* fen, char* board)
+void
+fen_to_board(char* fen, char* board, turn_e* turn)
 {
     memset(board, '.', sizeof(char) * BOARD_SIZE);
     char* placement = strtok(fen, " ");
@@ -19,6 +19,14 @@ fen_to_board(char* fen, char* board)
             }
         }
     }
-    board[b_pos] = '\0';
-    return board;
+    board[b_pos]   = '\0';
+
+    char* cur_turn = strtok(NULL, " ");
+    if (cur_turn != NULL) {
+        if (strcmp(cur_turn, "w") == 0) {
+            *turn = WHITE_TURN;
+        } else {
+            *turn = BLACK_TURN;
+        }
+    }
 }

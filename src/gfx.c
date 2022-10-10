@@ -1,4 +1,5 @@
 #include "gfx.h"
+#include <curses.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <locale.h>
@@ -115,9 +116,9 @@ void
 gfx_draw_player_info(player_t* players)
 {
     attrset(COLOR_PAIR(7));
-    mvprintw(BOARD_OFFSET_Y - 2, BOARD_OFFSET_X, "●");
+    mvprintw(BOARD_OFFSET_Y - 3, BOARD_OFFSET_X, "●");
     attrset(COLOR_PAIR(6));
-    mvprintw(BOARD_OFFSET_Y - 2, BOARD_OFFSET_X + 2, "%s", players[1].name);
+    mvprintw(BOARD_OFFSET_Y - 3, BOARD_OFFSET_X + 2, "%s", players[1].name);
     attrset(COLOR_PAIR(5));
     printw(" %s", players[1].rating);
 
@@ -127,6 +128,42 @@ gfx_draw_player_info(player_t* players)
     mvprintw(10 + BOARD_OFFSET_Y, BOARD_OFFSET_X + 2, "%s", players[0].name);
     attrset(COLOR_PAIR(5));
     printw(" %s", players[0].rating);
+}
+
+char*
+clock_str(int time)
+{
+    int min      = time / 60;
+    int sec      = time % 60;
+    char* output = (char*)malloc(sizeof(char) * 16);
+    sprintf(output, "%02d:%02d", min, sec);
+    return output;
+}
+
+void
+gfx_draw_clock(turn_e turn, int* clock)
+{
+    if (clock[0] != 0 && clock[1] != 0) {
+        char* clock_w = clock_str(clock[0]);
+        char* clock_b = clock_str(clock[1]);
+
+        if (turn == BLACK_TURN) {
+            attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(8));
+        } else {
+            attrset(A_NORMAL | COLOR_PAIR(8));
+        }
+        mvprintw(BOARD_OFFSET_Y - 2, BOARD_OFFSET_X + 2, "%s", clock_b);
+
+        if (turn == WHITE_TURN) {
+            attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(8));
+        } else {
+            attrset(A_NORMAL | COLOR_PAIR(8));
+        }
+        mvprintw(11 + BOARD_OFFSET_Y, BOARD_OFFSET_X + 2, "%s", clock_w);
+
+        free(clock_w);
+        free(clock_b);
+    }
 }
 
 void

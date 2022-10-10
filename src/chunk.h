@@ -26,4 +26,7 @@ chunk_get_fen();
 void
 chunk_parse_players(player_t* ref_players);
 
+void
+chunk_sync_clock(int* clock);
+
 #endif

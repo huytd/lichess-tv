@@ -15,6 +15,7 @@
  */
 
 #include "chunk.h"
+#include <stdio.h>
 
 static struct json_value_s* current_root;
 
@@ -106,6 +107,10 @@ parse_player(player_t* player, struct json_object_element_s* obj)
 
     // These JSON strings will be free when chunk_destroy is called
     // so, we need to copy these name strings into somewhere safe
+    if (player->rating != NULL)
+        free(player->rating);
+    if (player->name != NULL)
+        free(player->name);
     player->rating = (char*)malloc((strlen(rating_src) + 1) * sizeof(char));
     player->name   = (char*)malloc((strlen(name_src) + 1) * sizeof(char));
     strcpy(player->rating, rating_src);
@@ -137,6 +142,32 @@ chunk_parse_players(player_t* ref_players)
                   (struct json_object_element_s*)player_b->value->payload;
                 ref_players[1].is_black = 1;
                 parse_player(&ref_players[1], player_b_obj);
+            }
+        }
+    }
+}
+
+void
+chunk_sync_clock(int* clock)
+{
+    if (current_root != NULL) {
+        struct json_object_element_s* data = find_element_by_name("d");
+        if (data != NULL) {
+            struct json_object_element_s* data_el =
+              (struct json_object_element_s*)data->value->payload;
+
+            struct json_object_element_s* wc_el =
+              find_element_by_name_from(data_el, "wc");
+            struct json_object_element_s* bc_el =
+              find_element_by_name_from(data_el, "bc");
+
+            if (wc_el != NULL && bc_el != NULL) {
+                struct json_number_s* wc_val =
+                  json_value_as_number(wc_el->value);
+                struct json_number_s* bc_val =
+                  json_value_as_number(bc_el->value);
+                clock[0] = atoi(wc_val->number);
+                clock[1] = atoi(bc_val->number);
             }
         }
     }

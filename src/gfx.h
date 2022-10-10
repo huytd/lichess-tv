@@ -3,6 +3,7 @@
 
 #include <curses.h>
 #include "chunk.h"
+#include "fen.h"
 
 void
 gfx_init();
@@ -15,5 +16,8 @@ gfx_draw_board(char* board);
 
 void
 gfx_draw_player_info(player_t* players);
+
+void
+gfx_draw_clock(turn_e turn, int* clock);
 
 #endif
