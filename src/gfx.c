@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include <locale.h>
 
+#define CELL_SIZE 3
+
 static int SCREEN_HEIGHT  = 24;
 static int SCREEN_WIDTH   = 80;
 static int BOARD_OFFSET_X = 0;
@@ -21,6 +23,7 @@ gfx_init()
     }
     keypad(stdscr, TRUE);
     noecho();
+    nodelay(stdscr, 1);
     curs_set(false);
     use_default_colors();
 
@@ -48,7 +51,7 @@ gfx_init()
     init_pair(8, COLOR_WHITE, -1);
 
     getmaxyx(stdscr, SCREEN_HEIGHT, SCREEN_WIDTH);
-    BOARD_OFFSET_X = SCREEN_WIDTH / 2 - 10;
+    BOARD_OFFSET_X = SCREEN_WIDTH / 2 - 16;
     BOARD_OFFSET_Y = SCREEN_HEIGHT / 2 - 6;
     if (BOARD_OFFSET_Y < 4)
         BOARD_OFFSET_Y = 4;
@@ -62,7 +65,12 @@ gfx_draw_board(char* board)
     attrset(COLOR_PAIR(5));
     for (int i = 0; i < 8; i++) {
         mvprintw(i + BOARD_OFFSET_Y, BOARD_OFFSET_X, "%d", 8 - i);
-        mvprintw(8 + BOARD_OFFSET_Y, i * 2 + BOARD_OFFSET_X + 2, "%c", 'a' + i);
+        mvprintw(
+          8 + BOARD_OFFSET_Y,
+          i * CELL_SIZE + BOARD_OFFSET_X + 2,
+          " %c ",
+          'a' + i
+        );
     }
 
     for (int row = 0; row < 8; row++) {
@@ -70,7 +78,7 @@ gfx_draw_board(char* board)
             int index = row * 8 + col;
             int white_cell =
               row % 2 == 0 ? (col % 2 == 0 ? 1 : 0) : (col % 2 == 0 ? 0 : 1);
-            char* piece = "  ";
+            char* piece = "   ";
             if (islower(board[index])) {
                 // black piece
                 attrset(COLOR_PAIR(white_cell ? 1 : 2));
@@ -105,10 +113,15 @@ gfx_draw_board(char* board)
                     break;
             }
             mvprintw(
-              row + BOARD_OFFSET_Y, col * 2 + BOARD_OFFSET_X + 2, "%s ", piece
+              row + BOARD_OFFSET_Y,
+              col * CELL_SIZE + BOARD_OFFSET_X + 2,
+              " %s ",
+              piece
             );
         }
-        mvprintw(row + BOARD_OFFSET_Y, 8 * 2 + BOARD_OFFSET_X + 2, "\n");
+        mvprintw(
+          row + BOARD_OFFSET_Y, 8 * CELL_SIZE + BOARD_OFFSET_X + 2, "\n"
+        );
     }
 }
 

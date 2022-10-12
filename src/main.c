@@ -7,6 +7,8 @@
 #include <time.h>
 #include <pthread.h>
 
+static pthread_mutex_t app_state_mutex;
+
 typedef struct
 {
     int ready;
@@ -19,7 +21,7 @@ typedef struct
 static app_state_t app_state;
 
 void
-on_data(char* chunk, size_t len)
+handle_feed_data(char* chunk, size_t len)
 {
     app_state.ready = 1;
     chunk_parse(chunk, len);
@@ -31,6 +33,14 @@ on_data(char* chunk, size_t len)
     char* fen = (char*)chunk_get_fen();
     fen_to_board(fen, app_state.board, &app_state.current_turn);
     chunk_destroy();
+}
+
+void
+on_data(char* chunk, size_t len)
+{
+    pthread_mutex_lock(&app_state_mutex);
+    handle_feed_data(chunk, len);
+    pthread_mutex_unlock(&app_state_mutex);
 }
 
 void*
@@ -66,22 +76,32 @@ update(unsigned int* last_sync)
     }
 }
 
+void
+main_loop(unsigned int* last_sync)
+{
+    if (app_state.ready) {
+        render();
+        update(last_sync);
+    }
+}
+
 int
 main()
 {
     pthread_t feed_th;
     pthread_create(&feed_th, NULL, start_data_feed, NULL);
+    pthread_mutex_init(&app_state_mutex, NULL);
 
     unsigned int last_sync = clock();
 
     gfx_init();
-    while (true) {
-        if (app_state.ready) {
-            update(&last_sync);
-            render();
-        }
+    while (getch() != 'q') {
+        pthread_mutex_lock(&app_state_mutex);
+        main_loop(&last_sync);
+        pthread_mutex_unlock(&app_state_mutex);
     }
     gfx_destroy();
 
+    pthread_mutex_destroy(&app_state_mutex);
     return 0;
 }
