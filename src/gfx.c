@@ -143,22 +143,22 @@ gfx_draw_player_info(player_t* players)
     printw(" %s", players[0].rating);
 }
 
-char*
-clock_str(int time)
+void
+clock_to_str(int time, char* output)
 {
-    int min      = time / 60;
-    int sec      = time % 60;
-    char* output = (char*)malloc(sizeof(char) * 16);
+    int min = time / 60;
+    int sec = time % 60;
     sprintf(output, "%02d:%02d", min, sec);
-    return output;
 }
 
 void
 gfx_draw_clock(turn_e turn, int* clock)
 {
     if (clock[0] != 0 && clock[1] != 0) {
-        char* clock_w = clock_str(clock[0]);
-        char* clock_b = clock_str(clock[1]);
+        char clock_w[16];
+        char clock_b[16];
+        clock_to_str(clock[0], clock_w);
+        clock_to_str(clock[1], clock_b);
 
         if (turn == BLACK_TURN) {
             attrset(A_STANDOUT | A_BOLD | COLOR_PAIR(8));
@@ -173,9 +173,6 @@ gfx_draw_clock(turn_e turn, int* clock)
             attrset(A_NORMAL | COLOR_PAIR(8));
         }
         mvprintw(11 + BOARD_OFFSET_Y, BOARD_OFFSET_X + 2, "%s", clock_w);
-
-        free(clock_w);
-        free(clock_b);
     }
 }
 
