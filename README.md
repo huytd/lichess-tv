@@ -8,7 +8,7 @@ on Lichess right from your terminal.
 ## How to build
 
 Currently, there is no prebuilt binaries. You'll have to compile the code yourself.
-To build LiTV, you will need to install a couple of things:
+To build LiTV, you will need to install a couple tools and a couple libraries:
 
 - Clang
 - CMake
@@ -18,8 +18,8 @@ To build LiTV, you will need to install a couple of things:
 Then build with the following commands:
 
 ```
-$ ./setup
-$ ./build only
+$ ./setup.sh
+$ ./build.sh
 ```
 
 After the build, you can find the `litv` binary in the `build` folder:
